@@ -6,6 +6,8 @@ import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import AuthSocialButton from './AuthSocialButton';
 import { BsGithub, BsGoogle } from 'react-icons/bs';
 import axios from 'axios';
+import { signIn } from 'next-auth/react';
+import toast from 'react-hot-toast';
 
 type Variant = 'LOGIN' | 'REGISTER';
 const AuthForm = () => {
@@ -32,10 +34,22 @@ const AuthForm = () => {
            axios.post('/api/register',data)
         } if (variant === 'LOGIN') {
 
+            signIn('credentials',{...data,redirect:false}).then((call)=>{
+                if(call?.error) toast.error("Invalid Credentials");
+                if(call?.ok) toast.error("Logged in!");
+
+            }).finally(()=>{setLoading(false)})
+
         }
     }
     const socialAction = (action: string) => {
         setLoading(true);
+
+        signIn(action,{redirect:false}).then((call)=>{
+            if(call?.error) toast.error("Invalid Credentials");
+            if(call?.ok) toast.error("Logged in!");
+
+        }).finally(()=>{setLoading(false)})
     }
     return (
         <div className='mt-8 sm:mx-auto  sm:max-w-md sm:w-full'>
